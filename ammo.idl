@@ -15,7 +15,12 @@ interface btVector3 {
   void normalize();
   [Value] btVector3 rotate([Ref] btVector3 wAxis, float angle);
   float dot([Ref] btVector3 v);
+  [Value] btVector3 dot3([Const,Ref] btVector3 v0, [Const,Ref] btVector3 v1, [Const,Ref] btVector3 v2);
+  [Value] btVector3 cross([Const,Ref] btVector3 v);
+  float distance([Const,Ref] btVector3 v);
+  float distance2([Const,Ref] btVector3 v);
   [Operator="*=", Ref] btVector3 op_mul(float x);
+  [Operator="*=", Ref] btVector3 op_mulv([Const,Ref] btVector3 v);
   [Operator="+=", Ref] btVector3 op_add([Ref] btVector3 v);
   [Operator="-=", Ref] btVector3 op_sub([Ref] btVector3 v);
 };
@@ -66,20 +71,30 @@ btQuaternion implements btQuadWord;
 interface btMatrix3x3 {
   void setEulerZYX(float ex, float ey, float ez);
   void getRotation([Ref] btQuaternion q);
-  [Value] btVector3 getRow(long y);
+  [Value] btVector3 getColumn(long i);
+  [Value] btVector3 getRow(long i);
+  [Operator="+=", Ref] btMatrix3x3 op_add([Ref] btMatrix3x3 m);
+  [Operator="-=", Ref] btMatrix3x3 op_sub([Ref] btMatrix3x3 m);
+  [Operator="*=", Ref] btMatrix3x3 op_mul([Ref] btMatrix3x3 m);
 };
 
 interface btTransform {
   void btTransform();
   void btTransform([Ref] btQuaternion q, [Ref] btVector3 v);
 
+  void setBasis([Const,Ref] btMatrix3x3 basis);
   void setIdentity();
-  void setOrigin([Ref] btVector3 origin);
-  void setRotation([Ref] btQuaternion rotation);
+  void setOrigin([Const,Ref] btVector3 origin);
+  void setRotation([Const,Ref] btQuaternion rotation);
   [Ref] btVector3 getOrigin();
   [Value] btQuaternion getRotation();
   [Ref] btMatrix3x3 getBasis();
   void setFromOpenGLMatrix(float[] m);
+  void mult([Const,Ref] btTransform t1, [Const,Ref] btTransform t2);
+  [Value] btTransform inverse();
+  [Value] btTransform inverseTimes([Const,Ref] btTransform t);
+  [Value] btVector3 invXform([Const,Ref] btVector3 inVec);
+  [Operator="*=", Ref] btTransform op_mul([Const,Ref] btTransform other);
 };
 
 interface btMotionState {
@@ -532,11 +547,16 @@ interface btHingeConstraint {
   void setLimit(float low, float high, float softness, float biasFactor, optional float relaxationFactor);
   void enableAngularMotor(boolean enableMotor, float targetVelocity, float maxMotorImpulse);
   void setAngularOnly(boolean angularOnly);
-  
+
   void enableMotor(boolean enableMotor);
   void setMaxMotorImpulse(float maxMotorImpulse);
   //void setMotorTarget([Const,Ref] btQuaternion qAinB, float dt);
   void setMotorTarget(float targetAngle, float dt);
+
+  float getHingeAngle();
+  [Ref] btRigidBody getRigidBodyA();
+  [Ref] btRigidBody getRigidBodyB();
+
 };
 btHingeConstraint implements btTypedConstraint;
 
