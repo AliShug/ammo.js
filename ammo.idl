@@ -46,6 +46,7 @@ interface btQuadWord {
 
 interface btQuaternion {
   void btQuaternion(float x, float y, float z, float w);
+  void btQuaternion([Const,Ref] btVector3 axis, float angle);
   void setValue(float x, float y, float z, float w);
   void setEulerZYX(float z, float y, float x);
   void setRotation([Ref] btVector3 axis, float angle);
@@ -76,6 +77,7 @@ interface btMatrix3x3 {
   [Operator="+=", Ref] btMatrix3x3 op_add([Ref] btMatrix3x3 m);
   [Operator="-=", Ref] btMatrix3x3 op_sub([Ref] btMatrix3x3 m);
   [Operator="*=", Ref] btMatrix3x3 op_mul([Ref] btMatrix3x3 m);
+  void setValue(float xx, float xy, float xz, float yx, float yy, float yz, float zx, float zy, float zz);
 };
 
 interface btTransform {
@@ -111,7 +113,7 @@ btDefaultMotionState implements btMotionState;
 // Collision
 
 interface btCollisionObject {
-  void setAnisotropicFriction([Const, Ref] btVector3 anisotropicFriction, long frictionMode);
+  void setAnisotropicFriction([Const, Ref] btVector3 anisotropicFriction, optional long frictionMode);
   btCollisionShape getCollisionShape();
   void setContactProcessingThreshold(float contactProcessingThreshold);
   void setActivationState(long newState);
@@ -479,6 +481,8 @@ interface btTypedConstraint {
   void setBreakingImpulseThreshold([Const] float threshold);
   [Const] float getParam(long num, long axis);
   void setParam(long num, float value, long axis);
+  void setEnabled(boolean enabled);
+  boolean isEnabled();
 };
 
 enum btConstraintParams {
@@ -507,6 +511,8 @@ interface btGeneric6DofConstraint {
   void setLinearUpperLimit([Const, Ref] btVector3 linearUpper);
   void setAngularLowerLimit([Const, Ref] btVector3 angularLower);
   void setAngularUpperLimit([Const, Ref] btVector3 angularUpper);
+  [Ref] btTransform getFrameOffsetA();
+  [Ref] btTransform getFrameOffsetB();
 };
 btGeneric6DofConstraint implements btTypedConstraint;
 
@@ -516,11 +522,17 @@ interface btGeneric6DofSpringConstraint {
   void enableSpring(long index, boolean onOff);
   void setStiffness(long index, float stiffness);
   void setDamping(long index, float damping);
+  void setEquilibriumPoint(long index, float value);
+  void setEquilibriumPoint(long index);
+  void setEquilibriumPoint();
 };
 btGeneric6DofSpringConstraint implements btGeneric6DofConstraint;
 
 interface btSequentialImpulseConstraintSolver {
   void btSequentialImpulseConstraintSolver();
+  void reset();
+  void setRandSeed(long seed);
+  long getRandSeed();
 };
 
 interface btConeTwistConstraint {
@@ -528,6 +540,7 @@ interface btConeTwistConstraint {
   void btConeTwistConstraint([Ref] btRigidBody rbA, [Ref] btTransform rbAFrame);
 
   void setLimit(long limitIndex, float limitValue);
+  void setLimit(float _swingSpan1, float _swingSpan2, float _twistSpan, float _softness, float _biasFactor, float _relaxationFactor);
   void setAngularOnly(boolean angularOnly);
   void setDamping(float damping);
   void enableMotor(boolean b);
